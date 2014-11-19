@@ -13,7 +13,7 @@ public class Frame extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setTitle("PCD Project 2014/2015 - SNAKE");
 		setResizable(false);
-		setSize(475, 475);
+		setSize(450, 475);
 		init();
 	}
 
