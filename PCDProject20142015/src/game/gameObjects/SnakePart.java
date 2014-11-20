@@ -20,10 +20,17 @@ public class SnakePart {
 	public void happening() {}
 	
 	public void draw(Graphics g) {
-		g.setColor(Color.darkGray);
+		g.setColor(Color.BLACK);
 		g.fillRect(xSnakeCoordinate, ySnakeCoordinate, Xsquare, Ysquare);
-		g.setColor(Color.GREEN);
-		g.fillRect(xSnakeCoordinate + 3, ySnakeCoordinate + 3, Xsquare - 6, Ysquare - 6);
+		g.setColor(Color.GRAY);
+		g.fillRect(xSnakeCoordinate + 2, ySnakeCoordinate + 2, Xsquare - 4, Ysquare - 4);
+	}
+	
+	public void drawHead(Graphics g) {
+		g.setColor(Color.BLACK);
+		g.fillRect(xSnakeCoordinate, ySnakeCoordinate, Xsquare, Ysquare);
+		g.setColor(Color.LIGHT_GRAY);
+		g.fillRect(xSnakeCoordinate + 2, ySnakeCoordinate + 2, Xsquare - 4, Ysquare - 4);
 	}
 
 	public int getxSnakeCoordinate() {

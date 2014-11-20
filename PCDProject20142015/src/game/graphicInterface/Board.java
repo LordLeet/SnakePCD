@@ -97,11 +97,12 @@ public class Board extends JPanel implements Runnable, Observer {
 	private void drawSnake(Graphics g) {
 		for (int i = 0; i < snake.size(); i++) {
 			snake.get(i).draw(g);
+			snake.getLast().drawHead(g);
 
 		}
 
 	}
-	
+
 	private void refreshGrid(Graphics g) {
 
 		g.clearRect(20, 20, (squaresPerLine * SQUARESIZE) + SQUARESIZE,
@@ -120,13 +121,15 @@ public class Board extends JPanel implements Runnable, Observer {
 
 		snakePosY -= SQUARESIZE;
 
-		// Adiciona um quadrado a' Snake
-		snakepart = new SnakePart(snakePosX, snakePosY);
-		snake.add(snakepart);
+		if (!(snake.contains(snakePosX) && snake.contains(snakePosY))) {
+			// Adiciona um quadrado a' Snake
+			snakepart = new SnakePart(snakePosX, snakePosY);
+			snake.add(snakepart);
 
-		// Para a Snake não crescer indefinidamente
-		if (snake.size() > SNAKEMAXSIZE) {
-			snake.removeFirst();
+			// Para a Snake não crescer indefinidamente
+			if (snake.size() > SNAKEMAXSIZE) {
+				snake.removeFirst();
+			}
 		}
 	}
 
@@ -139,13 +142,15 @@ public class Board extends JPanel implements Runnable, Observer {
 
 		snakePosY += SQUARESIZE;
 
-		// Adiciona um quadrado a' Snake
-		snakepart = new SnakePart(snakePosX, snakePosY);
-		snake.add(snakepart);
+		if (!(snake.contains(snakePosX) && snake.contains(snakePosY))) {
+			// Adiciona um quadrado a' Snake
+			snakepart = new SnakePart(snakePosX, snakePosY);
+			snake.add(snakepart);
 
-		// Para a Snake não crescer indefinidamente
-		if (snake.size() > SNAKEMAXSIZE) {
-			snake.removeFirst();
+			// Para a Snake não crescer indefinidamente
+			if (snake.size() > SNAKEMAXSIZE) {
+				snake.removeFirst();
+			}
 		}
 	}
 
@@ -158,13 +163,15 @@ public class Board extends JPanel implements Runnable, Observer {
 
 		snakePosX -= SQUARESIZE;
 
-		// Adiciona um quadrado a' Snake
-		snakepart = new SnakePart(snakePosX, snakePosY);
-		snake.add(snakepart);
+		if (!(snake.contains(snakePosX) && snake.contains(snakePosY))) {
+			// Adiciona um quadrado a' Snake
+			snakepart = new SnakePart(snakePosX, snakePosY);
+			snake.add(snakepart);
 
-		// Para a Snake não crescer indefinidamente
-		if (snake.size() > SNAKEMAXSIZE) {
-			snake.removeFirst();
+			// Para a Snake não crescer indefinidamente
+			if (snake.size() > SNAKEMAXSIZE) {
+				snake.removeFirst();
+			}
 		}
 	}
 
@@ -177,13 +184,16 @@ public class Board extends JPanel implements Runnable, Observer {
 
 		snakePosX += SQUARESIZE;
 
-		// Adiciona um quadrado a' Snake
-		snakepart = new SnakePart(snakePosX, snakePosY);
-		snake.add(snakepart);
+		if (!(snake.contains(snakePosX) && snake.contains(snakePosY))) {
 
-		// Para a Snake não crescer indefinidamente
-		if (snake.size() > SNAKEMAXSIZE) {
-			snake.removeFirst();
+			// Adiciona um quadrado a' Snake
+			snakepart = new SnakePart(snakePosX, snakePosY);
+			snake.add(snakepart);
+
+			// Para a Snake não crescer indefinidamente
+			if (snake.size() > SNAKEMAXSIZE) {
+				snake.removeFirst();
+			}
 		}
 	}
 
@@ -240,13 +250,13 @@ public class Board extends JPanel implements Runnable, Observer {
 	}
 
 	private void initializeSnake() {
-		
+
 		if (snake.size() == 0) {
 			snakepart = new SnakePart(snakePosX, snakePosY);
 			snake.add(snakepart);
 		}
 	}
-	
+
 	@Override
 	public void update(Observable observable, Object obj) {
 		// TODO Auto-generated method stub
