@@ -11,13 +11,12 @@ import java.util.Observer;
 import java.util.Random;
 
 import javax.swing.JPanel;
-import javax.swing.plaf.SliderUI;
 
 public class Board extends JPanel implements Runnable, Observer {
 
+	private static final long serialVersionUID = 1L;
 	private boolean running = false;
 	private Thread boardThread;
-	private int timer = 0;
 
 	private int squaresPerLine = 20;
 	private final static int SQUARESIZE = 20;
@@ -33,7 +32,6 @@ public class Board extends JPanel implements Runnable, Observer {
 	private boolean up = false, down = false, left = false, right = false;
 
 	private Random r = new Random();
-	private int time = 0;
 
 	public Board() {
 

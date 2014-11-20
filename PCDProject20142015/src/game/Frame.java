@@ -3,12 +3,13 @@ package game;
 import game.graphicInterface.Board;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
 
 import javax.swing.JFrame;
 
 public class Frame extends JFrame {
 	
+	private static final long serialVersionUID = 1L;
+
 	public Frame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setTitle("PCD Project 2014/2015 - SNAKE");
