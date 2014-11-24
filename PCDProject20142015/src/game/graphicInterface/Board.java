@@ -5,76 +5,98 @@ import game.gameObjects.SnakePart;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Random;
 
-import javax.swing.JPanel;
+import javax.swing.JComponent;
 
-public class Board extends JPanel implements Runnable, Observer {
+
+public class Board extends JComponent implements Observer {
 
 	private static final long serialVersionUID = 1L;
-	private boolean running = false;
-	private Thread boardThread;
 
 	private int squaresPerLine = 20;
 	private final static int SQUARESIZE = 20;
+	
 	private int maxWidth = squaresPerLine * SQUARESIZE;
 	private int maxHeight = squaresPerLine * SQUARESIZE;
+	
+	private int mouseLine;
+	private int mouseColloumn;
 
-	private SnakePart snakepart;
-	private LinkedList<SnakePart> snake;
-	private int snakePosX = 200;
-	private int snakePosY = 120;
-	private static final int SNAKEMAXSIZE = 5;
-
-	private boolean up = false, down = false, left = false, right = false;
-
-	private Random r = new Random();
+	private SnakePart snake1;
+	private SnakePart snake2;
+	private LinkedList<SnakePart> snakes = new LinkedList<SnakePart>();
+	private final static int PLAYERS = 2;
 
 	public Board() {
 
 		setPreferredSize(new Dimension(maxWidth, maxHeight));
+		
+		addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				getMouseLocation(arg0);	
+				  if (snake1.getSnake().contains(arg0.getX()) || snake1.getSnake().contains(arg0.getY())) {
+					  System.out.println("SNAKE");
+				  }
+				
+			}
+		});
+		
+		snake1 = new SnakePart(200, 200);
+		snake1.addObserver(this);
+		snake1.start();
+		
+		snake2 = new SnakePart(40, 60);
+		snake2.addObserver(this);
+		snake2.start();
 
-		snake = new LinkedList<SnakePart>();
-		start();
 	}
 
-	public void start() {
-		running = true;
-		boardThread = new Thread(this, "Board");
-		boardThread.start();
+	private void getMouseLocation(MouseEvent arg0) {
+		mouseLine = (int) arg0.getX() / 20;
+		mouseColloumn = (int) arg0.getY() / 20;
+		
+		System.out.println(mouseLine + " " + mouseColloumn);
 	}
-
-	public void end() {
-	}
-
+	
 	public void paint(Graphics g) {
 		// para fazer reset a' window antes de recomeçar
 		refreshGrid(g);
 		drawGrid(g);
-		drawSnake(g);
-
-	}
-
-	@Override
-	public void run() {
-		while (running) {
-
-			initializeSnake();
-			pickDirection();
-			repaint();
-
-			try {
-				Thread.currentThread();
-				Thread.sleep(500);
-			} catch (Exception e) {
-				// TODO: handle exception
-			}
-
-		}
-
+		drawHighlight(g);
+		snake1.drawSnake(g);
+		snake2.drawSnake(g);
+		
 	}
 
 	/*
@@ -91,14 +113,10 @@ public class Board extends JPanel implements Runnable, Observer {
 					+ squaresPerLine * SQUARESIZE, SQUARESIZE + i * SQUARESIZE);
 		}
 	}
-
-	private void drawSnake(Graphics g) {
-		for (int i = 0; i < snake.size(); i++) {
-			snake.get(i).draw(g);
-			snake.getLast().drawHead(g);
-
-		}
-
+	
+	private void drawHighlight(Graphics g) {
+		g.setColor(Color.RED);
+		g.fillRect(mouseLine*SQUARESIZE, mouseColloumn*SQUARESIZE, SQUARESIZE, SQUARESIZE);
 	}
 
 	private void refreshGrid(Graphics g) {
@@ -107,157 +125,11 @@ public class Board extends JPanel implements Runnable, Observer {
 				(squaresPerLine * SQUARESIZE) + SQUARESIZE);
 	}
 
-	/*
-	 * ##################### # SNAKE MOVEMENT # #####################
-	 */
-	private void moveSnakeUp() {
-
-		right = false;
-		up = true;
-		down = false;
-		left = false;
-
-		snakePosY -= SQUARESIZE;
-
-		if (!(snake.contains(snakePosX) && snake.contains(snakePosY))) {
-			// Adiciona um quadrado a' Snake
-			snakepart = new SnakePart(snakePosX, snakePosY);
-			snake.add(snakepart);
-
-			// Para a Snake não crescer indefinidamente
-			if (snake.size() > SNAKEMAXSIZE) {
-				snake.removeFirst();
-			}
-		}
-	}
-
-	private void moveSnakeDown() {
-
-		right = false;
-		up = false;
-		down = true;
-		left = false;
-
-		snakePosY += SQUARESIZE;
-
-		if (!(snake.contains(snakePosX) && snake.contains(snakePosY))) {
-			// Adiciona um quadrado a' Snake
-			snakepart = new SnakePart(snakePosX, snakePosY);
-			snake.add(snakepart);
-
-			// Para a Snake não crescer indefinidamente
-			if (snake.size() > SNAKEMAXSIZE) {
-				snake.removeFirst();
-			}
-		}
-	}
-
-	private void moveSnakeLeft() {
-
-		right = false;
-		up = false;
-		down = false;
-		left = true;
-
-		snakePosX -= SQUARESIZE;
-
-		if (!(snake.contains(snakePosX) && snake.contains(snakePosY))) {
-			// Adiciona um quadrado a' Snake
-			snakepart = new SnakePart(snakePosX, snakePosY);
-			snake.add(snakepart);
-
-			// Para a Snake não crescer indefinidamente
-			if (snake.size() > SNAKEMAXSIZE) {
-				snake.removeFirst();
-			}
-		}
-	}
-
-	private void moveSnakeRight() {
-
-		right = true;
-		up = false;
-		down = false;
-		left = false;
-
-		snakePosX += SQUARESIZE;
-
-		if (!(snake.contains(snakePosX) && snake.contains(snakePosY))) {
-
-			// Adiciona um quadrado a' Snake
-			snakepart = new SnakePart(snakePosX, snakePosY);
-			snake.add(snakepart);
-
-			// Para a Snake não crescer indefinidamente
-			if (snake.size() > SNAKEMAXSIZE) {
-				snake.removeFirst();
-			}
-		}
-	}
-
-	private void pickDirection() {
-
-		int x = r.nextInt(4);
-		// int x = 3;
-
-		// Escolhe para que lado a Snake anda
-		switch (x) {
-
-		// Right
-		case 0:
-			if (!left && snakePosX <= maxWidth - SQUARESIZE) {
-
-				moveSnakeRight();
-
-			}
-
-			break;
-
-		// Left
-		case 1:
-			// porque a grid começa no 20|20 e vem da direita temos de
-			// fazer um square x 2
-			if (!right && snakePosX >= SQUARESIZE * 2) {
-
-				moveSnakeLeft();
-
-			}
-			break;
-
-		// Up
-		case 2:
-			if (!down && snakePosY >= SQUARESIZE * 2) {
-
-				moveSnakeUp();
-
-			}
-			break;
-
-		// Down
-		case 3:
-			if (!up && snakePosY <= maxHeight - SQUARESIZE) {
-
-				moveSnakeDown();
-
-			}
-			break;
-
-		default:
-			break;
-		}
-	}
-
-	private void initializeSnake() {
-
-		if (snake.size() == 0) {
-			snakepart = new SnakePart(snakePosX, snakePosY);
-			snake.add(snakepart);
-		}
-	}
-
 	@Override
 	public void update(Observable observable, Object obj) {
-		// TODO Auto-generated method stub
+		synchronized (this) {
+			repaint();
+		}
 
 	}
 
