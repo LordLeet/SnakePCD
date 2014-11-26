@@ -2,6 +2,7 @@ package game.gameObjects;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Random;
@@ -11,24 +12,30 @@ public class SnakePart extends Observable implements Runnable {
 	private int xSnakeCoordinate, ySnakeCoordinate;
 	private static final int SNAKE_BODY_SIZE = 20;
 	private int Xsquare, Ysquare;
+	private Color snakeColor;
 
 	private Thread snakeThread;
 	private boolean running = false;
 
 	private SnakePart snakepart;
 	public LinkedList<SnakePart> snake = new LinkedList<SnakePart>();
+	private LinkedList<Point> snakeLocation = new LinkedList<Point>();
+	private Point snakePoint;
+	private Point nextMovePoint;
 
-	private static final int SNAKE_MAX_SIZE = 5;
+	private static final int SNAKE_MAX_SIZE = 10;
+	private static final int SNAKE_INITIAL_SIZE = 3;
 
 	private boolean up = false, down = false, left = false, right = false;
 	private Random r = new Random();
 
-	public SnakePart(int x, int y) {
+	public SnakePart(int x, int y, Color snakeColor) {
 		xSnakeCoordinate = x;
 		ySnakeCoordinate = y;
 		Xsquare = SNAKE_BODY_SIZE;
 		Ysquare = SNAKE_BODY_SIZE;
-		
+		this.snakeColor = snakeColor;
+
 	}
 
 	/*
@@ -37,7 +44,7 @@ public class SnakePart extends Observable implements Runnable {
 	public void draw(Graphics g) {
 		g.setColor(Color.BLACK);
 		g.fillRect(xSnakeCoordinate, ySnakeCoordinate, Xsquare, Ysquare);
-		g.setColor(Color.GRAY);
+		g.setColor(getSnakeColor());
 		g.fillRect(xSnakeCoordinate + 2, ySnakeCoordinate + 2, Xsquare - 4,
 				Ysquare - 4);
 	}
@@ -66,6 +73,10 @@ public class SnakePart extends Observable implements Runnable {
 	public LinkedList<SnakePart> getSnake() {
 		return snake;
 	}
+	
+	public LinkedList<Point> getSnakeLocation() {
+		return snakeLocation;
+	}
 
 	public int getxSnakeCoordinate() {
 		return xSnakeCoordinate;
@@ -83,6 +94,10 @@ public class SnakePart extends Observable implements Runnable {
 		this.ySnakeCoordinate = ySnakeCoordinate;
 	}
 
+	private Color getSnakeColor() {
+		return snakeColor;
+	}
+
 	/*
 	 * ##################### # Thread # #####################
 	 */
@@ -90,16 +105,15 @@ public class SnakePart extends Observable implements Runnable {
 	public void run() {
 
 		while (running) {
-			initializeSnake();
+
 			pickDirection();
-			
+
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(300);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			
-			//System.out.println("x:" + getxSnakeCoordinate() + " y:" + getySnakeCoordinate());
+
 		}
 	}
 
@@ -110,15 +124,6 @@ public class SnakePart extends Observable implements Runnable {
 			snakeThread = new Thread(this, "Snake");
 			snakeThread.start();
 		}
-	}
-
-	private void initializeSnake() {
-
-		if (snake.size() == 0) {
-			snakepart = new SnakePart(200, 200);
-			snake.add(snakepart);
-			}
-
 	}
 
 	/*
@@ -132,17 +137,23 @@ public class SnakePart extends Observable implements Runnable {
 		left = false;
 
 		ySnakeCoordinate -= SNAKE_BODY_SIZE;
+		nextMovePoint = new Point (xSnakeCoordinate,ySnakeCoordinate);
 
-		if (!(snake.contains(xSnakeCoordinate) && snake
-				.contains(ySnakeCoordinate))) { // Adiciona um quadrado a' Snake
-			snakepart = new SnakePart(xSnakeCoordinate, ySnakeCoordinate);
-			snake.add(snakepart);
+		if (!(snakeLocation.contains(nextMovePoint))) {
+			// Adiciona um quadrado a' Snake
+			snakepart = new SnakePart(xSnakeCoordinate, ySnakeCoordinate, getSnakeColor());
+			snake.addLast(snakepart);
+			snakePoint = new Point(xSnakeCoordinate,ySnakeCoordinate);
+			snakeLocation.addLast(snakePoint);
 
 			// Para a Snake não crescer indefinidamente
 			if (snake.size() > SNAKE_MAX_SIZE) {
 				snake.removeFirst();
+				snakeLocation.removeFirst();
 			}
 		}
+		else System.err.println("Ocupado | UP" );
+		//	}
 
 	}
 
@@ -154,18 +165,23 @@ public class SnakePart extends Observable implements Runnable {
 		left = false;
 
 		ySnakeCoordinate += SNAKE_BODY_SIZE;
+		nextMovePoint = new Point (xSnakeCoordinate,ySnakeCoordinate);
 
-		if (!(snake.contains(xSnakeCoordinate) && snake
-				.contains(ySnakeCoordinate))) {
+		if (!(snakeLocation.contains(nextMovePoint))) {
 			// Adiciona um quadrado a' Snake
-			snakepart = new SnakePart(xSnakeCoordinate, ySnakeCoordinate);
-			snake.add(snakepart);
+			snakepart = new SnakePart(xSnakeCoordinate, ySnakeCoordinate, getSnakeColor());
+			snake.addLast(snakepart);
+			snakePoint = new Point(xSnakeCoordinate,ySnakeCoordinate);
+			snakeLocation.addLast(snakePoint);
 
 			// Para a Snake não crescer indefinidamente
 			if (snake.size() > SNAKE_MAX_SIZE) {
 				snake.removeFirst();
+				snakeLocation.removeFirst();
 			}
 		}
+
+		else System.err.println("Ocupado | DOWN");
 	}
 
 	private void moveSnakeLeft() {
@@ -176,18 +192,23 @@ public class SnakePart extends Observable implements Runnable {
 		left = true;
 
 		xSnakeCoordinate -= SNAKE_BODY_SIZE;
+		nextMovePoint = new Point (xSnakeCoordinate,ySnakeCoordinate);
 
-		if (!(snake.contains(xSnakeCoordinate) && snake
-				.contains(ySnakeCoordinate))) {
+		if (!(snakeLocation.contains(nextMovePoint))) {
 			// Adiciona um quadrado a' Snake
-			snakepart = new SnakePart(xSnakeCoordinate, ySnakeCoordinate);
-			snake.add(snakepart);
+			snakepart = new SnakePart(xSnakeCoordinate, ySnakeCoordinate, getSnakeColor());
+			snake.addLast(snakepart);
+			snakePoint = new Point(xSnakeCoordinate,ySnakeCoordinate);
+			snakeLocation.addLast(snakePoint);
 
 			// Para a Snake não crescer indefinidamente
 			if (snake.size() > SNAKE_MAX_SIZE) {
 				snake.removeFirst();
+				snakeLocation.removeFirst();
 			}
 		}
+
+		else System.err.println("Ocupado | LEFT");
 	}
 
 	private void moveSnakeRight() {
@@ -198,19 +219,24 @@ public class SnakePart extends Observable implements Runnable {
 		left = false;
 
 		xSnakeCoordinate += SNAKE_BODY_SIZE;
+		nextMovePoint = new Point (xSnakeCoordinate,ySnakeCoordinate);
 
-		if (!(snake.contains(xSnakeCoordinate) && snake
-				.contains(ySnakeCoordinate))) {
+		if (!(snakeLocation.contains(nextMovePoint))) {
 
 			// Adiciona um quadrado a' Snake
-			snakepart = new SnakePart(xSnakeCoordinate, ySnakeCoordinate);
-			snake.add(snakepart);
+			snakepart = new SnakePart(xSnakeCoordinate, ySnakeCoordinate, getSnakeColor());
+			snake.addLast(snakepart);
+			snakePoint = new Point(xSnakeCoordinate,ySnakeCoordinate);
+			snakeLocation.addLast(snakePoint);
 
 			// Para a Snake não crescer indefinidamente
 			if (snake.size() > SNAKE_MAX_SIZE) {
 				snake.removeFirst();
+				snakeLocation.removeFirst();
 			}
 		}
+
+		else System.err.println("Ocupado | RIGHT");
 	}
 
 	private void pickDirection() {
@@ -231,7 +257,7 @@ public class SnakePart extends Observable implements Runnable {
 
 			break;
 
-		// Left
+			// Left
 		case 1:
 			// porque a grid começa no 20|20 e vem da direita temos de
 			// fazer um square x 2
@@ -243,7 +269,7 @@ public class SnakePart extends Observable implements Runnable {
 			}
 			break;
 
-		// Up
+			// Up
 		case 2:
 			if (!down && ySnakeCoordinate >= SNAKE_BODY_SIZE * 2) {
 
@@ -253,7 +279,7 @@ public class SnakePart extends Observable implements Runnable {
 			}
 			break;
 
-		// Down
+			// Down
 		case 3:
 			if (!up && ySnakeCoordinate <= 400 - SNAKE_BODY_SIZE) {
 
