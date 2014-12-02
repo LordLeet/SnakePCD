@@ -1,6 +1,6 @@
 package game.graphicInterface;
 
-import game.gameObjects.SnakePart;
+import game.gameObjects.Snake;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -11,6 +11,7 @@ import java.awt.event.MouseListener;
 import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Random;
 
 import javax.swing.JComponent;
 
@@ -19,36 +20,38 @@ public class Board extends JComponent implements Observer {
 
 	private static final long serialVersionUID = 1L;
 
-	private int squaresPerLine = 20;
+	private int positionsPerLine = 20;
 	private final static int SQUARESIZE = 20;
 
-	private int maxWidth = squaresPerLine * SQUARESIZE;
-	private int maxHeight = squaresPerLine * SQUARESIZE;
+	private int maxWidth = positionsPerLine * SQUARESIZE;
+	private int maxHeight = positionsPerLine * SQUARESIZE;
 
 	private int mouseLine;
 	private int mouseColloumn;
-	private int mouseX;
-	private int mouseY;
 	private Point mouseCLick;
 
-	private SnakePart snake1;
-	private SnakePart snake2;
-	private LinkedList<SnakePart> snakes = new LinkedList<SnakePart>();
+	private Snake snake1;
+	private Snake snake2;
+	private LinkedList<Snake> snakes = new LinkedList<Snake>();
+
 	private final static int PLAYERS = 2;
+	private Random random = new Random();
 
 	public Board() {
 
 		setPreferredSize(new Dimension(maxWidth, maxHeight));
 
-		snake1 = new SnakePart(100, 100, Color.RED);
+	//	snake1 = new Snake( new Point(1,random.nextInt(positionsPerLine-3)+1), Color.RED, this);
+		snake1 = new Snake( new Point(3,10), Color.GREEN, this);
 		snake1.addObserver(this);
 		snake1.start();
 		snakes.add(snake1);
+		//snake1.setSnakeDestination(new Point(20,20));
 
-		snake2 = new SnakePart(400, 400, Color.BLUE);
+/*		snake2 = new Snake(new Point(random.nextInt(positionsPerLine-3)+1,3), Color.BLUE, this);
 		snake2.addObserver(this);
 		snake2.start();
-		snakes.add(snake2);
+		snakes.add(snake2);*/
 
 		addMouseListener(new MouseListener() {
 
@@ -86,39 +89,31 @@ public class Board extends JComponent implements Observer {
 	}
 
 	private void getMouseLocation(MouseEvent arg0) {
-		mouseX = arg0.getX();
-		mouseY = arg0.getY();
+
 		mouseLine = (int) arg0.getX() / SQUARESIZE;
 		mouseColloumn = (int) arg0.getY() / SQUARESIZE;
-		mouseCLick = new Point(mouseLine*SQUARESIZE, mouseColloumn*SQUARESIZE);
+		mouseCLick = new Point(mouseLine, mouseColloumn);
+		
+			for(Snake s : snakes) {
+			if (s.getSnake().contains(mouseCLick)) {
+				s.pauseSnake();
 
-		System.out.println(mouseX + " " + mouseY + " Line: " + mouseLine + " Colloumn: " + mouseColloumn);
+			}
 
-		if (snake1.getSnakeLocation().contains(mouseCLick)) {
-			System.out.println("SNAKE");
-			synchronized (snake1) {
-
-				try {
-					snake1.wait();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			else {
+				
+				s.setSnakeDestination(mouseCLick);
 
 			}
 		}
-		
-		else snake1.notifyAll();
+
 	}
 
 	public void paint(Graphics g) {
 		// para fazer reset a' window antes de recomeçar
 		refreshGrid(g);
 		drawGrid(g);
-		drawHighlight(g);
-		snake1.drawSnake(g);
-		snake2.drawSnake(g);
-
+		drawSnake(g);
 	}
 
 	/*
@@ -128,24 +123,67 @@ public class Board extends JComponent implements Observer {
 	private void drawGrid(Graphics g) {
 
 		g.setColor(Color.black);
-		for (int i = 0; i <= squaresPerLine; i++) {
+		for (int i = 0; i <= positionsPerLine; i++) {
 			g.drawLine(SQUARESIZE + i * SQUARESIZE, SQUARESIZE, SQUARESIZE + i
-					* SQUARESIZE, SQUARESIZE + squaresPerLine * SQUARESIZE);
+					* SQUARESIZE, SQUARESIZE + positionsPerLine * SQUARESIZE);
 			g.drawLine(SQUARESIZE, SQUARESIZE + i * SQUARESIZE, SQUARESIZE
-					+ squaresPerLine * SQUARESIZE, SQUARESIZE + i * SQUARESIZE);
+					+ positionsPerLine * SQUARESIZE, SQUARESIZE + i * SQUARESIZE);
 		}
-	}
-
-	private void drawHighlight(Graphics g) {
-		g.setColor(Color.GRAY);
-		if (mouseLine != 0 || mouseColloumn != 0)
-			g.fillRect(mouseLine*SQUARESIZE, mouseColloumn*SQUARESIZE, SQUARESIZE, SQUARESIZE);	
 	}
 
 	private void refreshGrid(Graphics g) {
 
-		g.clearRect(20, 20, (squaresPerLine * SQUARESIZE) + SQUARESIZE,
-				(squaresPerLine * SQUARESIZE) + SQUARESIZE);
+		g.clearRect(20, 20, (positionsPerLine * SQUARESIZE) + SQUARESIZE,
+				(positionsPerLine * SQUARESIZE) + SQUARESIZE);
+	}
+
+	public void drawSnake(Graphics g) {
+
+		for (int j = 0; j < snakes.size(); j++) {
+
+			for (int i = 0; i < snakes.get(j).getSnake().size(); i++) {
+				
+				//Draw Border
+				g.setColor(Color.BLACK);
+				g.fillRect(snakes.get(j).getSnake().get(i).x * SQUARESIZE, snakes.get(j).getSnake().get(i).y * SQUARESIZE, SQUARESIZE, SQUARESIZE);
+				//Draw Body
+				g.setColor(snakes.get(j).getSnakeColor());
+				g.fillRect(snakes.get(j).getSnake().get(i).x * SQUARESIZE +2, snakes.get(j).getSnake().get(i).y * SQUARESIZE+2, SQUARESIZE-4, SQUARESIZE-4);
+
+			}			
+		}
+		
+		drawSnakeHead(g);
+	}
+
+	public void drawSnakeHead(Graphics g) {
+
+		for (int j = 0; j < snakes.size(); j++) {
+
+			int x1,y1,x2,y2;
+			x1 = snakes.get(j).getSnake().getFirst().x* SQUARESIZE;
+			y1 = snakes.get(j).getSnake().getFirst().y * SQUARESIZE;
+			x2 = SQUARESIZE;
+			y2 = SQUARESIZE;
+
+			g.setColor(Color.BLACK);
+			g.fillRect(x1, y1, x2, y2);
+			g.setColor(Color.LIGHT_GRAY);
+			g.fillRect(x1 + 2, y1 + 2, x2 - 4, y2 - 4);
+		}
+
+	}
+
+	public int getBoardHeight() {
+		return maxHeight;
+	}
+
+	public int getBoardWidth() {
+		return maxWidth;
+	}
+
+	public int getPositionsPerLine() {
+		return positionsPerLine;
 	}
 
 	@Override
